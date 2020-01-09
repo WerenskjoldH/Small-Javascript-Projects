@@ -1,0 +1,28 @@
+body {
+  margin-top: 0px;
+}
+
+#project-title {
+  font-family: Consolas, Lucida Console, Times;
+  font-weight: bold;
+  font-size: 32px;
+
+  margin-top: 5vh;
+  margin-bottom: auto;
+
+  text-align: center;
+  text-shadow: 1px 1px 6px rgba(31, 31, 31, 0.267);
+}
+
+canvas {
+  position: absolute;
+  /* No transform-origin in absolute positioning, bummer */
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+
+  border: 5px;
+  border-style: solid;
+
+  box-shadow: 0px 0px 8px 4px rgba(31, 31, 31, 0.3);
+}

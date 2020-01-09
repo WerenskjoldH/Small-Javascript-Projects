@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <link rel="stylesheet" href="../webgl.css" type="text/css" />
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
 
     <!-- Adds quick functionality for setting up and creating 3D environments -->
     <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
@@ -39,7 +40,9 @@
       //noStroke();
     }
 
-    function mousePressed() {
+    function mousePressed(e) {
+      console.log(e.target);
+      if (e.target.className != "p5Canvas") return;
       click = true;
     }
 
@@ -69,31 +72,4 @@
       clickPrevious = click;
     }
   </script>
-
-  <style>
-    body {
-      margin-top: 0px;
-    }
-
-    #project-title {
-      font-family: Consolas, Lucida Console, Times;
-      font-weight: bold;
-      font-size: 64px;
-      text-align: center;
-      text-shadow: 1px 1px 6px rgba(31, 31, 31, 0.267);
-    }
-
-    canvas {
-      position: absolute;
-      /* No transform-origin in absolute positioning, bummer */
-      transform: translate(-50%, -50%);
-      top: 50%;
-      left: 50%;
-
-      border: 5px;
-      border-style: solid;
-
-      box-shadow: 0px 0px 8px 4px rgba(31, 31, 31, 0.3);
-    }
-  </style>
 </html>
