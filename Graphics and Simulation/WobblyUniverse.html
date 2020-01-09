@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>WebGL Example - Wobbly Universe</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="../webgl.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Wobbly Universe
+    </h1>
+    <canvas id="glcanvas"></canvas>
+  </body>
+
+  <script>
+    const rectWidth = 10;
+
+    let playEffect = false;
+    let [effectX, effectY] = [225, 225];
+
+    let click = false;
+    let clickPrevious = false;
+
+    function setup() {
+      createCanvas(450, 450);
+      background(50);
+      //noStroke();
+    }
+
+    function mousePressed() {
+      click = true;
+    }
+
+    function mouseReleased() {
+      click = false;
+    }
+
+    function draw() {
+      if (click && !clickPrevious && !playEffect) {
+        [effectX, effectY] = [mouseX, mouseY];
+      }
+
+      let [radiusX, radiusY] = [2000, 2000];
+      for (let i = 0; i < 20; i++) {
+        radiusX *= 0.75;
+        radiusY *= 0.75;
+        push();
+        ellipse(
+          effectX + 40 * sin(i + millis() / 500),
+          effectY + 10 * cos(i + millis() / 100),
+          radiusX,
+          radiusY
+        );
+        pop();
+      }
+
+      clickPrevious = click;
+    }
+  </script>
+
+  <style>
+    body {
+      margin-top: 0px;
+    }
+
+    #project-title {
+      font-family: Consolas, Lucida Console, Times;
+      font-weight: bold;
+      font-size: 64px;
+      text-align: center;
+      text-shadow: 1px 1px 6px rgba(31, 31, 31, 0.267);
+    }
+
+    canvas {
+      position: absolute;
+      /* No transform-origin in absolute positioning, bummer */
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 50%;
+
+      border: 5px;
+      border-style: solid;
+
+      box-shadow: 0px 0px 8px 4px rgba(31, 31, 31, 0.3);
+    }
+  </style>
+</html>
