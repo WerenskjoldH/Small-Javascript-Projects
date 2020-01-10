@@ -12,6 +12,9 @@ body {
 
   text-align: center;
   text-shadow: 1px 1px 6px rgba(31, 31, 31, 0.267);
+
+  /* I don't know why I hate selectable text so much :| */
+  -webkit-user-select: none;
 }
 
 canvas {
