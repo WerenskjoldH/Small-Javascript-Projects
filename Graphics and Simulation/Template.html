@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>WebGL Example - Change Me></title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="../webgl.css" type="text/css" />
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Title
+    </h1>
+    <canvas id="glcanvas"></canvas>
+  </body>
+
+  <script>
+    let click = false;
+    let clickPrevious = false;
+
+    function setup() {
+      createCanvas(450, 450);
+      background(50);
+      //noStroke();
+    }
+
+    function mousePressed(e) {
+      if (e.target.className != "p5Canvas") return;
+      click = true;
+    }
+
+    function mouseReleased() {
+      click = false;
+    }
+
+    function draw() {
+      // 1. User Input
+      if (click && !clickPrevious) {
+        console.log("clicked in canvas");
+      }
+
+      push();
+      // 2. Do drawing stuff here
+      pop();
+
+      // 3. Update previous click
+      clickPrevious = click;
+    }
+  </script>
+</html>
