@@ -1,0 +1,3 @@
+Github stats tracker in About Me section
+
+Require two clicks to open pages, if mobile(?)
