@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>WebGL Example - Semi-Menger Sponge></title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Semi-Menger Sponge
+    </h1>
+    <canvas id="glcanvas"></canvas>
+  </body>
+
+  <script>
+    class Menger {
+      /*
+        posX: x position of box
+        posY: y position of box
+        posZ: z position of box
+        s: scale of the box
+      */
+      constructor(posX, posY, posZ, d, s) {
+        this.x = posX;
+        this.y = posY;
+        this.z = posZ;
+        this.scale = s;
+        this.depth = d;
+        this.boxes = new Array();
+        this.createMenger(posX, posY, posZ, 1, s);
+        console.log(this.boxes);
+      }
+
+      drawMenger() {
+        this.boxes.forEach(function(e) {
+          e.drawBox();
+        });
+      }
+
+      createMenger(posX, posY, posZ, depth, scale) {
+        if (depth > this.depth) return;
+
+        for (let x = -1; x < 2; x++)
+          for (let y = -1; y < 2; y++)
+            for (let z = -1; z < 2; z++) {
+              if (
+                (x != 0 && y == 0) ||
+                (x == 0 && z == 0) ||
+                (y != 0 && z == 0)
+              ) {
+                continue;
+              }
+              let nS = scale / 3;
+              let nX = posX + x * nS;
+              let nY = posY + y * nS;
+              let nZ = posZ + z * nS;
+              if (depth != this.depth) {
+                this.createMenger(nX, nY, nZ, depth + 1, nS);
+                continue;
+              }
+
+              this.boxes.push(new Box(nX, nY, nZ, nS));
+            }
+      }
+    }
+
+    class Box {
+      /*
+        posX: x position of box
+        posY: y position of box
+        posZ: z position of box
+        s: scale of the box
+      */
+      constructor(posX, posY, posZ, s) {
+        this.x = posX;
+        this.y = posY;
+        this.z = posZ;
+        this.scale = s;
+      }
+
+      drawBox() {
+        push();
+        translate(this.x, this.y, this.z);
+        stroke(200);
+        box(this.scale);
+        pop();
+      }
+    }
+
+    let click = false;
+    let clickPrevious = false;
+
+    let mengerSponge;
+
+    function setup() {
+      createCanvas(450, 450, WEBGL);
+      background(50);
+      //noStroke();
+      //noFill();
+
+      mengerSponge = new Menger(0, 0, 0, 2, 200);
+    }
+
+    function mousePressed(e) {
+      if (e.target.className != "p5Canvas") return;
+      click = true;
+    }
+
+    function mouseReleased() {
+      click = false;
+    }
+
+    function draw() {
+      // 1. User Input
+      if (click && !clickPrevious) {
+        console.log("clicked in canvas");
+      }
+
+      // 2. Draw Here
+      background(50);
+      rotateX(frameCount * 0.01);
+      rotateZ(frameCount * 0.01);
+      mengerSponge.drawMenger();
+
+      // 3. Update previous click
+      clickPrevious = click;
+    }
+  </script>
+</html>

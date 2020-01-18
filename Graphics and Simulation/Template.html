@@ -7,7 +7,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link rel="stylesheet" href="../webgl.css" type="text/css" />
     <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
 
     <!-- Adds quick functionality for setting up and creating 3D environments -->
@@ -50,9 +49,9 @@
         console.log("clicked in canvas");
       }
 
-      push();
-      // 2. Do drawing stuff here
-      pop();
+      // 2. Draw Here
+      // Clear the Screen
+      background(50);
 
       // 3. Update previous click
       clickPrevious = click;
