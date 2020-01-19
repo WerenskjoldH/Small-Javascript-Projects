@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>WebGL Example - Gift Wrapping></title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Gift Wrapping
+    </h1>
+    <canvas id="glcanvas"></canvas>
+  </body>
+
+  <script>
+    // This class is unnecessary, but nice for readability
+    class Dot {
+      constructor(posX, posY) {
+        this.x = posX;
+        this.y = posY;
+      }
+
+      drawDot() {
+        point(this.x, this.y);
+      }
+    }
+
+    /*
+    Description: Place dots inside a square centered at <x, y> with a width equal       to twice the halfWidth
+      arr: array to fill
+      numDots: number of dots to place
+      x: x point to place dots around
+      y: y point to place dots around
+      halfWidth: half width of box
+    */
+    function placeDots(arr, numDots, x, y, halfWidth) {
+      for (let i = 0; i < numDots; i++) {
+        // Dots won't be plotted at edge of bounds
+        arr.push(
+          new Dot(
+            x - halfWidth + Math.random() * 2 * halfWidth,
+            y - halfWidth + Math.random() * 2 * halfWidth
+          )
+        );
+      }
+    }
+
+    function generateHull() {}
+
+    let click = false;
+    let clickPrevious = false;
+
+    // Points
+    let P = new Array();
+    // Hull
+    let H = new Array();
+
+    function setup() {
+      createCanvas(450, 450);
+      background(50);
+      strokeWeight(10);
+      placeDots(P, 100, width / 2, height / 2, 150);
+      //noStroke();
+    }
+
+    function mousePressed(e) {
+      if (e.target.className != "p5Canvas") return;
+      click = true;
+    }
+
+    function mouseReleased() {
+      click = false;
+    }
+
+    function draw() {
+      // 1. User Input
+      if (click && !clickPrevious) {
+        console.log("clicked in canvas");
+      }
+
+      // 2. Draw Here
+      // Clear the Screen
+      background(50);
+      stroke(255);
+      P.forEach(d => {
+        d.drawDot();
+      });
+
+      // 3. Update previous click
+      clickPrevious = click;
+    }
+  </script>
+</html>
