@@ -30,15 +30,26 @@
       constructor(posX, posY) {
         this.x = posX;
         this.y = posY;
+        this.selected = false;
       }
 
       drawDot() {
+        if (this.selected) {
+          stroke(255, 100, 255, 255);
+          point(this.x, this.y);
+          stroke(255);
+          return;
+        }
         point(this.x, this.y);
+      }
+
+      calculateAngle(oPosX, oPosY) {
+        return Math.atan2(this.y - oPosY, this.x - oPosX);
       }
     }
 
     /*
-    Description: Place dots inside a square centered at <x, y> with a width equal       to twice the halfWidth
+    Description: Place dots inside a square centered at <x, y> with a width equal to twice the halfWidth
       arr: array to fill
       numDots: number of dots to place
       x: x point to place dots around
@@ -46,18 +57,67 @@
       halfWidth: half width of box
     */
     function placeDots(arr, numDots, x, y, halfWidth) {
+      // This is to remove an extra if inside the loop
+      lowestIndex = arr.length;
       for (let i = 0; i < numDots; i++) {
+        let xPos = x - halfWidth + Math.random() * 2 * halfWidth;
+        let yPos = y - halfWidth + Math.random() * 2 * halfWidth;
         // Dots won't be plotted at edge of bounds
-        arr.push(
-          new Dot(
-            x - halfWidth + Math.random() * 2 * halfWidth,
-            y - halfWidth + Math.random() * 2 * halfWidth
-          )
-        );
+        arr.push(new Dot(xPos, yPos));
+        // Keep track of lowest pos and index - this doesn't check for equal ys
+        if (yPos >= arr[lowestIndex].y) {
+          lowestIndex = i;
+        }
       }
     }
 
-    function generateHull() {}
+    function determineTurn(x0, y0, x1, y1, x2, y2) {
+      return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
+    }
+
+    // Takes an array of points and the index of the lowest point
+    // Returns an array of indexes for hull points
+    function generateHull(arr, largestYIndex) {
+      let indexes = new Array();
+      // Since JS has stack like function, we're going to to do this
+      let stack = new Array();
+
+      // Fill the array with indexes to all points
+      for (let i = 0; i < arr.length; i++) indexes.push(i);
+
+      // Sort the array by angle
+      indexes.sort(function(first, second) {
+        if (
+          arr[first].calculateAngle(
+            arr[largestYIndex].x,
+            arr[largestYIndex].y
+          ) <=
+          arr[second].calculateAngle(arr[largestYIndex].x, arr[largestYIndex].y)
+        )
+          return 1;
+        else return -1;
+      });
+      //arr[indexes[0]].selected = true;
+      for (let i = 0; i < indexes.length; i++) {
+        print(stack);
+        while (
+          stack.length > 1 &&
+          determineTurn(
+            arr[stack[1]].x,
+            arr[stack[1]].y,
+            arr[stack[0]].x,
+            arr[stack[0]].y,
+            arr[indexes[i]].x,
+            arr[indexes[i]].y
+          ) > 0
+        ) {
+          stack.shift();
+        }
+        stack.unshift(indexes[i]);
+      }
+
+      return stack;
+    }
 
     let click = false;
     let clickPrevious = false;
@@ -66,12 +126,14 @@
     let P = new Array();
     // Hull
     let H = new Array();
+    let lowestIndex = -1;
 
     function setup() {
       createCanvas(450, 450);
       background(50);
       strokeWeight(10);
       placeDots(P, 100, width / 2, height / 2, 150);
+      H = generateHull(P, lowestIndex);
       //noStroke();
     }
 
