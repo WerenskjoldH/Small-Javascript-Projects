@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>10Print</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      10Print
+    </h1>
+    <canvas id="glcanvas"></canvas>
+  </body>
+
+  <script>
+    let click = false;
+    let clickPrevious = false;
+
+    let arr = new Array();
+    let spacing = 10;
+    let x = 0;
+    let y = 0;
+
+    function setup() {
+      createCanvas(450, 450);
+      stroke(255);
+      background(50);
+    }
+
+    function draw() {
+      if (y < height) {
+        // Right slash else Left slash
+        if (Math.random() > 0.5) stroke(x + spacing, y + spacing, x, y);
+        else stroke(x, y, x + spacing, y + spacing);
+        x += spacing;
+        if (x >= width) {
+          x = 0;
+          y += spacing;
+          console.log("Hit");
+        }
+      }
+
+      clickPrevious = click;
+    }
+  </script>
+</html>
