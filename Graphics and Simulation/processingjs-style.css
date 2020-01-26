@@ -17,6 +17,10 @@ body {
   -webkit-user-select: none;
 }
 
+#description {
+  text-align: center;
+}
+
 canvas {
   position: absolute;
   /* No transform-origin in absolute positioning, bummer */
