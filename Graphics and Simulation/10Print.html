@@ -25,10 +25,6 @@
   </body>
 
   <script>
-    let click = false;
-    let clickPrevious = false;
-
-    let arr = new Array();
     let spacing = 10;
     let x = 0;
     let y = 0;
@@ -36,23 +32,24 @@
     function setup() {
       createCanvas(450, 450);
       stroke(255);
+      strokeWeight(2);
       background(50);
     }
 
     function draw() {
       if (y < height) {
         // Right slash else Left slash
-        if (Math.random() > 0.5) stroke(x + spacing, y + spacing, x, y);
-        else stroke(x, y, x + spacing, y + spacing);
+        if (Math.random() > 0.5) {
+          line(x + spacing, y + spacing, x, y);
+        } else {
+          line(x + spacing, y, x, y + spacing);
+        }
         x += spacing;
         if (x >= width) {
           x = 0;
           y += spacing;
-          console.log("Hit");
         }
       }
-
-      clickPrevious = click;
     }
   </script>
 </html>
