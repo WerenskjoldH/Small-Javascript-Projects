@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>WebGL Example - Circles in a Rectangle></title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Circles in a Rectangle
+    </h1>
+    <canvas id="glcanvas"></canvas>
+    <h2 id="description">Please Click The Canvas</h2>
+  </body>
+
+  <script>
+    class Circle {
+      constructor(posX, posY, radius) {
+        this.posX = posX;
+        this.posY = posY;
+        this.radius = radius;
+      }
+    }
+
+    let click = false;
+    let clickPrevious = false;
+
+    let arr = new Array();
+    const topBuffer = 15;
+    const maxStepX = 20;
+    const minStepY = 5;
+    const maxStepY = 20;
+
+    function calculateRadii(a) {
+      for (let i = 0; i < a.length; i++) {
+        let sR = Math.min(
+          a[i].posX,
+          a[i].posY,
+          width - a[i].posX,
+          height - a[i].posY
+        );
+        for (let j = 0; j < a.length; j++) {
+          if (i == j) continue;
+          let distBetween = Math.sqrt(
+            Math.pow(a[j].posY - a[i].posY, 2) +
+              Math.pow(a[j].posX - a[i].posX, 2)
+          );
+          // If the other point doesn't have a radius yet, we take the midpoint of the two points
+          if (a[j].radius == 0) sR = Math.min(sR, distBetween / 2);
+          else sR = Math.min(sR, Math.abs(distBetween - a[j].radius));
+        }
+        a[i].radius = sR;
+      }
+    }
+
+    function setup() {
+      createCanvas(450, 450);
+      background(50);
+      //noStroke();
+    }
+
+    function mousePressed(e) {
+      if (e.target.className != "p5Canvas" || mouseButton !== LEFT) return;
+      click = true;
+    }
+
+    function mouseReleased() {
+      click = false;
+    }
+
+    function draw() {
+      // 1. User Input
+      if (click && !clickPrevious) {
+        arr.push(new Circle(mouseX, mouseY, 10));
+        calculateRadii(arr);
+      }
+
+      // 2. Draw Here
+      // Clear the Screen
+      background(50);
+      arr.forEach(c => {
+        circle(c.posX, c.posY, 2 * c.radius);
+      });
+
+      // 3. Update previous click
+      clickPrevious = click;
+    }
+  </script>
+</html>
