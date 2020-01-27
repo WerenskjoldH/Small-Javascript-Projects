@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>10Print - Exploration #2</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      10Print - Exploration #2
+    </h1>
+    <canvas id="glcanvas"></canvas>
+  </body>
+
+  <script>
+    let spacing = 25;
+    let radius = 10;
+    let x = 0;
+    let y = 0;
+    let x1 = 5;
+    let y1 = 5;
+
+    function setup() {
+      createCanvas(450, 450);
+      noStroke();
+      background(50);
+    }
+
+    function draw() {
+      if (y < height) {
+        // Right slash else Left slash
+        randV = Math.random();
+        if (randV > 0.5) {
+          fill(255);
+          for (let i = 0; i < randV * 3.0; i++)
+            rect(x + i * 2, y + i * 2, 2 * radius, 2 * radius);
+        } else {
+          fill(50);
+          circle(x + spacing, y - spacing, 2 * radius);
+        }
+        x += spacing;
+        if (x >= width) {
+          x = 0;
+          y += spacing;
+        }
+      }
+    }
+  </script>
+</html>
