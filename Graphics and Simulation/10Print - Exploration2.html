@@ -21,6 +21,7 @@
     <h1 id="project-title">
       10Print - Exploration #2
     </h1>
+    <h2 id="description">Let it iterate once</h2>
     <canvas id="glcanvas"></canvas>
   </body>
 
@@ -34,28 +35,35 @@
 
     function setup() {
       createCanvas(450, 450);
-      noStroke();
+      stroke(255);
+      strokeWeight(4);
+      fill(50);
       background(50);
     }
 
     function draw() {
+      // If already drawn in draw over with background color and draw one cell down and to the left
+      // If y == 0, or x == width, 20% chance to draw a horizontal slash i.e. "/"
       if (y < height) {
-        // Right slash else Left slash
-        randV = Math.random();
-        if (randV > 0.5) {
-          fill(255);
-          for (let i = 0; i < randV * 3.0; i++)
-            rect(x + i * 2, y + i * 2, 2 * radius, 2 * radius);
-        } else {
-          fill(50);
-          circle(x + spacing, y - spacing, 2 * radius);
+        occupied = get(x + spacing / 2, y + spacing / 2);
+        if (y == 0 || (x == width - spacing && occupied[0] != 255)) {
+          randV = Math.random();
+          if (randV > 0.6) line(x + spacing, y, x, y + spacing);
         }
+
+        if (occupied[0] == 255) {
+          noStroke();
+          rect(x, y, spacing, spacing);
+          stroke(255);
+          line(x, y + spacing, x - spacing, y + 2 * spacing);
+        }
+
         x += spacing;
         if (x >= width) {
           x = 0;
           y += spacing;
         }
-      }
+      } else y = 0;
     }
   </script>
 </html>
