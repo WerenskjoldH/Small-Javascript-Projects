@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Circular Noise</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+    <style>
+      .input {
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Noise
+    </h1>
+    <canvas id="glcanvas"></canvas>
+    <div style="text-align:center">
+      <input
+        type="range"
+        min="1"
+        max="100"
+        value="50"
+        class="slider"
+        id="xOffset"
+      />
+      <button onclick="clearCanvas()">Clear</button>
+    </div>
+  </body>
+
+  <script>
+    let click = false;
+    let clickPrevious = false;
+    const slider = document.getElementById("xOffset");
+
+    function setup() {
+      createCanvas(450, 450);
+      background(50);
+      strokeWeight(5);
+      //noStroke();
+    }
+
+    function mousePressed(e) {
+      if (e.target.className != "p5Canvas" || mouseButton !== LEFT) return;
+      click = true;
+    }
+
+    function mouseReleased() {
+      click = false;
+    }
+
+    let offset = 0;
+    let zOffset = 0;
+    let xPos, yPos;
+
+    function draw() {
+      xPos = Math.cos(millis() / 1000);
+      yPos = Math.sin(millis() / 1000);
+      zOffset =
+        100 * noise(xPos + Math.cos(slider.value + millis() / 1000), yPos);
+
+      // 2. Draw Here
+      // Clear the Screen
+      //background(50);
+      stroke(255);
+
+      point(width / 2 + xPos * zOffset, height / 2 + yPos * zOffset);
+    }
+
+    function clearCanvas() {
+      background(50);
+    }
+  </script>
+</html>
