@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Steering Behavior</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Steering Behavior
+    </h1>
+    <canvas id="glcanvas"></canvas>
+  </body>
+
+  <script>
+    class dot {
+      constructor(posX, posY) {
+        // Current Position
+        this.pos = createVector(random(-width, width), random(-height, height));
+        // Desired Position
+        this.dPos = createVector(posX, posY);
+        // Velocity
+        this.vel = p5.Vector.random2D();
+        // Acceleration
+        this.acc = createVector(0, 0);
+        // Size of the point
+        this.weight = 5;
+        // Maximum Speed
+        this.maxSpeed = 10.0;
+        this.maxForce = 1;
+      }
+
+      update() {
+        var arriveForce = this.arriveAtPoint(this.dPos);
+        var fleeForce = this.fleePoint(createVector(mouseX, mouseY));
+
+        arriveForce.mult(1);
+        fleeForce.mult(4);
+
+        this.addForce(arriveForce);
+        this.addForce(fleeForce);
+
+        this.vel.add(this.acc);
+        this.pos.add(this.vel);
+
+        // Acceleration does not carry over
+        this.acc.mult(0);
+      }
+
+      addForce(v) {
+        this.acc.add(v);
+      }
+
+      seekPoint(tar) {
+        var desired = p5.Vector.sub(tar, this.pos);
+
+        desired.setMag(this.maxSpeed);
+
+        return p5.Vector.sub(desired, this.vel).limit(this.maxForce);
+      }
+
+      fleePoint(tar) {
+        var desired = p5.Vector.sub(tar, this.pos);
+        var distance = desired.mag();
+
+        if (distance < 100) {
+          desired.setMag(this.maxSpeed);
+          desired.mult(-1);
+
+          return p5.Vector.sub(desired, this.vel).limit(this.maxForce);
+        } else return createVector(0, 0);
+      }
+
+      arriveAtPoint(tar) {
+        var desired = p5.Vector.sub(tar, this.pos);
+        var distance = desired.mag();
+        var speed = this.maxSpeed;
+
+        if (distance < 100) {
+          speed = map(distance, 0, 100, 0, this.maxSpeed);
+        }
+
+        desired.setMag(speed);
+
+        return p5.Vector.sub(desired, this.vel).limit(this.maxForce);
+      }
+    }
+
+    let click = false;
+    let clickPrevious = false;
+
+    const totalPoints = 50;
+    var points = new Array();
+
+    function setup() {
+      createCanvas(450, 450);
+      background(50);
+      stroke(255);
+
+      for (let i = 0; i < totalPoints; i++) {
+        points.push(
+          new dot(random(width - 100) + 50, random(height - 100) + 50)
+        );
+      }
+      console.log(points);
+    }
+
+    function mousePressed(e) {
+      if (e.target.className != "p5Canvas" || mouseButton !== LEFT) return;
+      click = true;
+    }
+
+    function mouseReleased() {
+      click = false;
+    }
+
+    function draw() {
+      if (click && !clickPrevious) {
+        console.log("clicked in canvas");
+      }
+
+      background(50);
+      points.forEach(p => {
+        p.update();
+        // Would be neat to have weight affect point movement
+        strokeWeight(p.weight);
+        point(p.pos.x, p.pos.y);
+      });
+
+      clickPrevious = click;
+    }
+  </script>
+</html>
