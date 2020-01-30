@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Steering Behavior</title>
+    <title>Steering Behaviors</title>
 
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -19,14 +19,26 @@
 
   <body>
     <h1 id="project-title">
-      Steering Behavior
+      Steering Behaviors
     </h1>
     <canvas id="glcanvas"></canvas>
   </body>
 
   <script>
+    // This feels silly, and I like it
+    var Behaviors = {
+      // 0001
+      FLEE: 1,
+      // 0010
+      ARRIVE: 2,
+      // 0100
+      SEEK: 4,
+      // 1000
+      ATTRACT: 8
+    };
+
     class dot {
-      constructor(posX, posY) {
+      constructor(posX, posY, bmask) {
         // Current Position
         this.pos = createVector(random(-width, width), random(-height, height));
         // Desired Position
@@ -40,23 +52,49 @@
         // Maximum Speed
         this.maxSpeed = 10.0;
         this.maxForce = 1;
+        // Behavior Bitmask
+        this.bitmask = bmask;
+        // Color
+        if (bmask & Behaviors.ATTRACT) this.color = color(255, 204, 0);
+        else this.color = color(255, 255, 255);
       }
 
       update() {
-        var arriveForce = this.arriveAtPoint(this.dPos);
-        var fleeForce = this.fleePoint(createVector(mouseX, mouseY));
-
-        arriveForce.mult(1);
-        fleeForce.mult(4);
-
-        this.addForce(arriveForce);
-        this.addForce(fleeForce);
+        this.updateBehavior();
 
         this.vel.add(this.acc);
         this.pos.add(this.vel);
 
         // Acceleration does not carry over
         this.acc.mult(0);
+      }
+
+      updateBehavior() {
+        var force = 0;
+
+        if (this.bitmask & Behaviors.SEEK) {
+          force = this.seekPoint(this.dPos);
+          force.mult(1);
+          this.addForce(force);
+        }
+
+        if (this.bitmask & Behaviors.ARRIVE) {
+          force = this.arriveAtPoint(this.dPos);
+          force.mult(1);
+          this.addForce(force);
+        }
+
+        if (this.bitmask & Behaviors.FLEE) {
+          force = this.fleePoint(mouseVec);
+          force.mult(4);
+          this.addForce(force);
+        }
+
+        if (this.bitmask & Behaviors.ATTRACT) {
+          force = this.attractPoint(mouseVec);
+          force.mult(1.5);
+          this.addForce(force);
+        }
       }
 
       addForce(v) {
@@ -83,6 +121,17 @@
         } else return createVector(0, 0);
       }
 
+      attractPoint(tar) {
+        var desired = p5.Vector.sub(tar, this.pos);
+        var distance = desired.mag();
+
+        if (distance < 75) {
+          desired.setMag(this.maxSpeed);
+
+          return p5.Vector.sub(desired, this.vel).limit(this.maxForce);
+        } else return createVector(0, 0);
+      }
+
       arriveAtPoint(tar) {
         var desired = p5.Vector.sub(tar, this.pos);
         var distance = desired.mag();
@@ -101,6 +150,8 @@
     let click = false;
     let clickPrevious = false;
 
+    var mouseVec;
+
     const totalPoints = 50;
     var points = new Array();
 
@@ -109,12 +160,26 @@
       background(50);
       stroke(255);
 
+      mouseVec = zeroVec = createVector(0, 0);
+
       for (let i = 0; i < totalPoints; i++) {
-        points.push(
-          new dot(random(width - 100) + 50, random(height - 100) + 50)
-        );
+        if (i % 2 == 0)
+          points.push(
+            new dot(
+              random(width - 100) + 50,
+              random(height - 100) + 50,
+              Behaviors.FLEE | Behaviors.ARRIVE
+            )
+          );
+        else
+          points.push(
+            new dot(
+              random(width - 100) + 50,
+              random(height - 100) + 50,
+              Behaviors.ATTRACT | Behaviors.ARRIVE
+            )
+          );
       }
-      console.log(points);
     }
 
     function mousePressed(e) {
@@ -131,11 +196,15 @@
         console.log("clicked in canvas");
       }
 
+      mouseVec.x = mouseX;
+      mouseVec.y = mouseY;
+
       background(50);
       points.forEach(p => {
         p.update();
         // Would be neat to have weight affect point movement
         strokeWeight(p.weight);
+        stroke(p.color);
         point(p.pos.x, p.pos.y);
       });
 
