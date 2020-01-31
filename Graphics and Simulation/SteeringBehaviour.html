@@ -41,8 +41,8 @@
       constructor(posX, posY, bmask) {
         // Current Position
         this.pos = createVector(random(-width, width), random(-height, height));
-        // Desired Position
-        this.dPos = createVector(posX, posY);
+        // Target Position
+        this.tarPos = createVector(posX, posY);
         // Velocity
         this.vel = p5.Vector.random2D();
         // Acceleration
@@ -73,13 +73,13 @@
         var force = 0;
 
         if (this.bitmask & Behaviors.SEEK) {
-          force = this.seekPoint(this.dPos);
+          force = this.seekPoint(this.tarPos);
           force.mult(1);
           this.addForce(force);
         }
 
         if (this.bitmask & Behaviors.ARRIVE) {
-          force = this.arriveAtPoint(this.dPos);
+          force = this.arriveAtPoint(this.tarPos);
           force.mult(1);
           this.addForce(force);
         }
