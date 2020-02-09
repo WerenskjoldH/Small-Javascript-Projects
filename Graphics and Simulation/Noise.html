@@ -70,9 +70,6 @@
       zOffset =
         100 * noise(xPos + Math.cos(slider.value + millis() / 1000), yPos);
 
-      // 2. Draw Here
-      // Clear the Screen
-      //background(50);
       stroke(255);
 
       point(width / 2 + xPos * zOffset, height / 2 + yPos * zOffset);
