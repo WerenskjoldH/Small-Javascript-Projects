@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Terrain Generation</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Terrain Generation
+    </h1>
+  </body>
+
+  <script>
+    var scale;
+    var cols;
+    var rows;
+    var xOffset;
+    var yOffset;
+
+    let terrain;
+
+    function setup() {
+      createCanvas(512, 512, WEBGL);
+      background(50);
+      stroke(255);
+      noFill();
+
+      scale = 16;
+      terrainWidth = 1024;
+      terrainHeight = 1024;
+      cols = terrainWidth / scale;
+      rows = terrainHeight / scale;
+      xOffset = terrainWidth / 2 - scale;
+      yOffset = terrainHeight / 2 - scale;
+      console.log(cols, rows);
+
+      // Constructing a 2D Array
+      terrain = new Array(cols);
+      for (let i = 0; i < cols; i++) {
+        terrain[i] = new Array(rows);
+      }
+
+      // Fill the 2D Array with height information
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          terrain[x][y] = random(-10, 10);
+        }
+      }
+    }
+
+    function draw() {
+      background(50);
+
+      rotateX(PI / 3);
+
+      for (let y = 0; y < rows - 1; y++) {
+        beginShape(TRIANGLE_STRIP);
+        for (let x = 0; x < cols; x++) {
+          vertex(x * scale - xOffset, y * scale - yOffset, terrain[x][y]);
+          vertex(x * scale - xOffset, (y + 1) * scale - yOffset, terrain[x][y]);
+        }
+        endShape();
+      }
+    }
+  </script>
+</html>
