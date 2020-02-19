@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Collatz Visualization</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Collatz
+    </h1>
+  </body>
+
+  <script>
+    let n;
+    let x, y;
+    let k = 10;
+
+    // This function returns the number of steps required to collapse to 1
+    function collatz(v) {
+      let step = 0;
+      let interValue = v;
+      while (interValue > 1) {
+        let evenOrOdd = interValue % 2;
+        if (evenOrOdd == 0) interValue = interValue / 2;
+        else interValue = 3 * interValue + 1;
+        step++;
+        console.log(interValue);
+      }
+
+      return step;
+    }
+
+    function setup() {
+      createCanvas(450, 450);
+      background(50);
+      strokeWeight(k);
+      stroke(255);
+
+      [x, y] = [0, 0];
+    }
+
+    function draw() {
+      if (y >= height) return;
+
+      let maxStep = collatz(x + y * width);
+      let evenOrOddMaxStep = maxStep % 2;
+      if (evenOrOddMaxStep == 0) stroke(255, 144, 144);
+      else stroke(144, 255, 144);
+      point(x, y);
+
+      x += k;
+      if (x > width) {
+        x = 0;
+        y += k;
+      }
+    }
+  </script>
+</html>
