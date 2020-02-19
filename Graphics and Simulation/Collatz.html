@@ -27,6 +27,7 @@
     let n;
     let x, y;
     let k = 10;
+    let halfK = k / 2;
 
     // This function returns the number of steps required to collapse to 1
     function collatz(v) {
@@ -49,7 +50,7 @@
       strokeWeight(k);
       stroke(255);
 
-      [x, y] = [0, 0];
+      [x, y] = [halfK, halfK];
     }
 
     function draw() {
@@ -62,8 +63,8 @@
       point(x, y);
 
       x += k;
-      if (x > width) {
-        x = 0;
+      if (x > width - halfK) {
+        x = halfK;
         y += k;
       }
     }
