@@ -19,7 +19,6 @@
       type="text/javascript"
       src="Libraries/ProcessingJS/addons/p5.dom.min.js"
     ></script>
-    <audio src="song01.mp4" />
   </head>
 
   <body>
@@ -36,18 +35,22 @@
         this.radius = radius;
         this.samplePoints = samples;
         this.angleDelta = (2.0 * Math.PI) / samples;
-        console.log(this);
       }
 
-      draw() {
-        for (let i = 0; i <= 2.0 * Math.PI; i += this.angleDelta) {
-          fill(255);
-          circle(
-            this.x + this.radius * Math.cos(i),
-            this.y + this.radius * Math.sin(i),
-            10
+      draw(spectrum, amplitude) {
+        //spectrum.length goes from [0, 1023]
+        let maxSpec = 512;
+        let halfPi = (-1 * Math.PI) / 2;
+        beginShape();
+        for (let i = 0; i < maxSpec; i++) {
+          let spectrumMod = map(spectrum[i], 0, 255, 0, 1.0);
+          let amp = this.radius + 50 * spectrumMod;
+          vertex(
+            this.x + amp * Math.cos((i / maxSpec) * (2.0 * Math.PI) + halfPi),
+            this.y + amp * Math.sin((i / maxSpec) * (2.0 * Math.PI) + halfPi)
           );
         }
+        endShape(CLOSE);
       }
     }
 
@@ -55,27 +58,33 @@
 
     let songSource;
     let songAnalyzer;
+    let songFFT;
     let ringVis;
 
     function preload() {
-      songSource = loadSound("song01.mp4");
+      songSource = loadSound("song02.mp3");
     }
 
     function setup() {
       createCanvas(450, 450);
       background(50);
-      noStroke();
+      strokeWeight(5);
+      stroke(255);
+      noFill();
       ringVis = new RingVisualizer(width / 2, height / 2, 50, 25);
 
       songAnalyzer = new p5.Amplitude();
       songAnalyzer.setInput(songSource);
+
+      songFFT = new p5.FFT();
+      songFFT.setInput(songSource);
+
       songSource.play();
     }
 
     function draw() {
       background(50);
-      ringVis.radius = 50 + 50 * songAnalyzer.getLevel();
-      ringVis.draw();
+      ringVis.draw(songFFT.analyze(), songAnalyzer.getLevel());
     }
   </script>
 </html>
