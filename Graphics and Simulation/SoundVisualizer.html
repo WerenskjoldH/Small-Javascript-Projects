@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Change Me</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/p5.sound.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+    <audio src="song01.mp4" />
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Sound Visualizer
+    </h1>
+  </body>
+
+  <script>
+    class RingVisualizer {
+      constructor(posX, posY, radius, samples) {
+        this.x = posX;
+        this.y = posY;
+        this.radius = radius;
+        this.samplePoints = samples;
+        this.angleDelta = (2.0 * Math.PI) / samples;
+        console.log(this);
+      }
+
+      draw() {
+        for (let i = 0; i <= 2.0 * Math.PI; i += this.angleDelta) {
+          fill(255);
+          circle(
+            this.x + this.radius * Math.cos(i),
+            this.y + this.radius * Math.sin(i),
+            10
+          );
+        }
+      }
+    }
+
+    const numberPoint = 100;
+
+    let songSource;
+    let songAnalyzer;
+    let ringVis;
+
+    function preload() {
+      songSource = loadSound("song01.mp4");
+    }
+
+    function setup() {
+      createCanvas(450, 450);
+      background(50);
+      noStroke();
+      ringVis = new RingVisualizer(width / 2, height / 2, 50, 25);
+
+      songAnalyzer = new p5.Amplitude();
+      songAnalyzer.setInput(songSource);
+      songSource.play();
+    }
+
+    function draw() {
+      background(50);
+      ringVis.radius = 50 + 50 * songAnalyzer.getLevel();
+      ringVis.draw();
+    }
+  </script>
+</html>
