@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Forward Kinematics</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="processingjs-style.css" type="text/css" />
+
+    <!-- Adds quick functionality for setting up and creating 3D environments -->
+    <script type="text/javascript" src="Libraries/ProcessingJS/p5.js"></script>
+    <script
+      type="text/javascript"
+      src="Libraries/ProcessingJS/addons/p5.dom.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 id="project-title">
+      Forward Kinematics
+    </h1>
+  </body>
+
+  <script>
+    class Segment {
+      constructor(previousSegment, segmentLength, angleDegrees) {
+        if (previousSegment.hasOwnProperty("length")) {
+          // This is a segment
+          this.previousSegment = previousSegment;
+          this.position = new p5.Vector(
+            this.previousSegment.endPosition.x,
+            this.previousSegment.endPosition.y
+          );
+          this.rotation = previousSegment.rotation;
+        } else {
+          this.position = previousSegment;
+          this.rotation = 0;
+          this.previousSegment = false;
+        }
+
+        this.length = segmentLength;
+        this.selfRotation = angleDegrees * (Math.PI / 180);
+        this.endPosition = new p5.Vector(0, 0);
+
+        console.log(this.position, this.endPosition);
+      }
+
+      update() {
+        if (this.previousSegment) {
+          // There is a previous segment
+          this.position = this.previousSegment.endPosition;
+          this.calculateEndPosition();
+        } else {
+          // There is no previous segment
+          this.calculateEndPosition();
+        }
+      }
+
+      calculateEndPosition() {
+        if (this.previousSegment) {
+          this.rotation = this.previousSegment.rotation + this.selfRotation;
+          this.position = this.previousSegment.endPosition.copy();
+          this.endPosition = new p5.Vector(
+            this.position.x + this.length * Math.cos(-1 * this.rotation),
+            this.position.y + this.length * Math.sin(-1 * this.rotation)
+          );
+        } else {
+          this.rotation = this.selfRotation;
+          this.endPosition = new p5.Vector(
+            this.position.x + this.length * Math.cos(-1 * this.rotation),
+            this.position.y + this.length * Math.sin(-1 * this.rotation)
+          );
+        }
+      }
+
+      drawSegment() {
+        line(
+          this.position.x,
+          this.position.y,
+          this.endPosition.x,
+          this.endPosition.y
+        );
+      }
+
+      wave() {
+        var offset = Math.PI / 2.0;
+        this.selfRotation = Math.sin(millis() / 1000) + offset;
+      }
+    }
+
+    let testSegment;
+    let testSegmentTwo;
+    let testSegmentThree;
+
+    function setup() {
+      createCanvas(450, 450);
+      background(50);
+      stroke(255);
+      strokeWeight(6);
+
+      testSegment = new Segment(new p5.Vector(width / 2, height), 100, 45.0);
+      testSegmentTwo = new Segment(testSegment, 50, 45.0);
+      testSegmentThree = new Segment(testSegmentTwo, 25, 0);
+    }
+
+    function draw() {
+      testSegment.update();
+      testSegment.wave();
+      testSegmentTwo.update();
+      testSegmentTwo.wave();
+      testSegmentThree.update();
+      testSegmentThree.wave();
+
+      background(50);
+      testSegment.drawSegment();
+      testSegmentTwo.drawSegment();
+      testSegmentThree.drawSegment();
+    }
+  </script>
+</html>
