@@ -212,7 +212,30 @@ var init = function () {
     projectionMatrix
   );
 
-  // This uses the last bound buffer
-  // Method of elements to skip, number of points to draw
-  glContext.drawArrays(glContext.TRIANGLES, 0, 3);
+  var identityMatrix = new Float32Array(16);
+  glMatrix.mat4.identity(identityMatrix);
+
+  var angle = 0;
+  var loop = function () {
+    angle = (performance.now() / 1000 / 6) * 2 * Math.PI;
+    glMatrix.mat4.rotate(worldMatrix, identityMatrix, angle, [0, 1, 0]);
+
+    glContext.uniformMatrix4fv(
+      worldMatrixUniformLocation,
+      glContext.FALSE,
+      worldMatrix
+    );
+
+    glContext.clearColor(0.5, 0.85, 0.8, 1.0);
+    glContext.clear(glContext.DEPTH_BUFFER_BIT | glContext.COLOR_BUFFER_BIT);
+
+    // Method of elements to skip, number of points to draw
+    glContext.drawArrays(glContext.TRIANGLES, 0, 3);
+
+    requestAnimationFrame(loop);
+  };
+
+  // Calls this function whenever this canvas is ready to draw
+  // Only called if frame is in focus
+  requestAnimationFrame(loop);
 };
