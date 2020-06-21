@@ -30,7 +30,6 @@ var fragmentShader = [
 ].join("\n");
 
 var init = function () {
-  console.log("hit");
 
   var canvas = document.getElementById("glCanvas");
   var glContext = canvas.getContext("webgl");
@@ -49,6 +48,17 @@ var init = function () {
   //   canvas.width = window.innerWidth;
   //   canvas.height = window.innerHeight;
   //   glContext.viewport(0, 0, window.innerWidth, window.innerHeight);
+
+  // Enable Depth Test in OpenGL State Machine
+  // This will enable depth testing in the rasterizer
+  //    Compares pixel depth when deciding what to draw
+  glContext.enable(glContext.DEPTH_TEST);
+
+  // Enable Back Face Culling in OpenGL State Machine
+  // This will prevent unnecessary calculations of culled faces
+  glContext.enable(glContext.CULL_FACE);
+  glContext.frontFace(glContext.CCW);
+  glContext.cullFace(glContext.BACK);
 
   glContext.clearColor(0.5, 0.85, 0.8, 1.0);
   glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
@@ -97,39 +107,85 @@ var init = function () {
 
   /// Create and set buffer
 
-  var triangleVertices = [
-    // <x,y, z> <r,g,b>
-    0.0,
-    0.5,
-    0.0,
-    0.0,
-    0.5,
-    1.0,
-    -0.5,
-    -0.5,
-    0.0,
-    0.7,
-    0.1,
-    0.0,
-    0.5,
-    -0.5,
-    0.0,
-    0.9,
-    1.0,
-    0.6,
+	var boxVertices = 
+	[ // X, Y, Z           R, G, B
+		// Top
+		-1.0, 1.0, -1.0,   0.5, 0.5, 0.5,
+		-1.0, 1.0, 1.0,    0.5, 0.5, 0.5,
+		1.0, 1.0, 1.0,     0.5, 0.5, 0.5,
+		1.0, 1.0, -1.0,    0.5, 0.5, 0.5,
+
+		// Left
+		-1.0, 1.0, 1.0,    0.75, 0.25, 0.5,
+		-1.0, -1.0, 1.0,   0.75, 0.25, 0.5,
+		-1.0, -1.0, -1.0,  0.75, 0.25, 0.5,
+		-1.0, 1.0, -1.0,   0.75, 0.25, 0.5,
+
+		// Right
+		1.0, 1.0, 1.0,    0.25, 0.25, 0.75,
+		1.0, -1.0, 1.0,   0.25, 0.25, 0.75,
+		1.0, -1.0, -1.0,  0.25, 0.25, 0.75,
+		1.0, 1.0, -1.0,   0.25, 0.25, 0.75,
+
+		// Front
+		1.0, 1.0, 1.0,    1.0, 0.0, 0.15,
+		1.0, -1.0, 1.0,    1.0, 0.0, 0.15,
+		-1.0, -1.0, 1.0,    1.0, 0.0, 0.15,
+		-1.0, 1.0, 1.0,    1.0, 0.0, 0.15,
+
+		// Back
+		1.0, 1.0, -1.0,    0.0, 1.0, 0.15,
+		1.0, -1.0, -1.0,    0.0, 1.0, 0.15,
+		-1.0, -1.0, -1.0,    0.0, 1.0, 0.15,
+		-1.0, 1.0, -1.0,    0.0, 1.0, 0.15,
+
+		// Bottom
+		-1.0, -1.0, -1.0,   0.5, 0.5, 1.0,
+		-1.0, -1.0, 1.0,    0.5, 0.5, 1.0,
+		1.0, -1.0, 1.0,     0.5, 0.5, 1.0,
+		1.0, -1.0, -1.0,    0.5, 0.5, 1.0,
   ];
+  
+  var boxIndices =
+	[
+		// Top
+		0, 1, 2,
+		0, 2, 3,
+
+		// Left
+		5, 4, 6,
+		6, 4, 7,
+
+		// Right
+		8, 9, 10,
+		8, 10, 11,
+
+		// Front
+		13, 12, 14,
+		15, 14, 12,
+
+		// Back
+		16, 17, 18,
+		16, 18, 19,
+
+		// Bottom
+		21, 20, 22,
+		22, 20, 23
+	];
 
   // Create Vertex buffer object
-  var triangleVBO = glContext.createBuffer();
-  glContext.bindBuffer(glContext.ARRAY_BUFFER, triangleVBO);
-
-  // Binds data to currently bound buffer
-  // Note: We have to ensure the floats being passed are 32bit, JS works in 64bit floats and this can cause issues, so we must cast it
+  var boxVBO = glContext.createBuffer();
+  glContext.bindBuffer(glContext.ARRAY_BUFFER, boxVBO);
   glContext.bufferData(
     glContext.ARRAY_BUFFER,
-    new Float32Array(triangleVertices),
+    new Float32Array(boxVertices),
     glContext.STATIC_DRAW
   );
+
+  // Index Buffer Object, states the order and which verticies make up the triangles
+  var boxIndexBufferObject = glContext.createBuffer();
+  glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, boxIndexBufferObject)
+  glContext.bufferData(glContext.ELEMENT_ARRAY_BUFFER, new Uint16Array(boxIndices), glContext.STATIC_DRAW);
 
   // Get a handle to the attribute locations
   var positionAttributeLocation = glContext.getAttribLocation(
@@ -144,7 +200,7 @@ var init = function () {
   // Specify layout
   glContext.vertexAttribPointer(
     positionAttributeLocation, // Attribute location handle
-    2, // Elements being passed
+    3, // Elements being passed
     glContext.FLOAT, // Type of element
     glContext.FALSE, // Normalized data
     6 * Float32Array.BYTES_PER_ELEMENT, // Total size of elements being passed AKA: Stride
@@ -187,7 +243,7 @@ var init = function () {
   var projectionMatrix = new Float32Array(16);
 
   glMatrix.mat4.identity(worldMatrix);
-  glMatrix.mat4.lookAt(viewMatrix, [0, 0, -5], [0, 0, 0], [0, 1, 0]);
+  glMatrix.mat4.lookAt(viewMatrix, [0, 0, -10], [0, 0, 0], [0, 1, 0]);
   glMatrix.mat4.perspective(
     projectionMatrix,
     glMatrix.glMatrix.toRadian(45),
@@ -212,13 +268,18 @@ var init = function () {
     projectionMatrix
   );
 
+  var xRotMatrix = new Float32Array(16);
+  var yRotMatrix = new Float32Array(16);
+
   var identityMatrix = new Float32Array(16);
   glMatrix.mat4.identity(identityMatrix);
 
   var angle = 0;
   var loop = function () {
     angle = (performance.now() / 1000 / 6) * 2 * Math.PI;
-    glMatrix.mat4.rotate(worldMatrix, identityMatrix, angle, [0, 1, 0]);
+    glMatrix.mat4.rotate(yRotMatrix, identityMatrix, angle, [0, 1, 0]);
+    glMatrix.mat4.rotate(xRotMatrix, identityMatrix, angle / 2, [1, 0, 0]);
+    glMatrix.mat4.mul(worldMatrix, xRotMatrix, yRotMatrix);
 
     glContext.uniformMatrix4fv(
       worldMatrixUniformLocation,
@@ -230,7 +291,7 @@ var init = function () {
     glContext.clear(glContext.DEPTH_BUFFER_BIT | glContext.COLOR_BUFFER_BIT);
 
     // Method of elements to skip, number of points to draw
-    glContext.drawArrays(glContext.TRIANGLES, 0, 3);
+    glContext.drawElements(glContext.TRIANGLES, boxIndices.length, glContext.UNSIGNED_SHORT, 0);
 
     requestAnimationFrame(loop);
   };
