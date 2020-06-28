@@ -1,0 +1,19 @@
+precision mediump float;
+
+attribute vec3 vertPosition;
+attribute vec2 vertTexCoord;
+
+uniform mat4 worldMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+
+varying vec2 fragTexCoord;
+
+void main()
+{
+    fragTexCoord = vertTexCoord;
+    
+    mat4 pvwMatrix = projectionMatrix * viewMatrix * worldMatrix;
+
+    gl_Position = pvwMatrix * vec4(vertPosition, 1.0);
+}

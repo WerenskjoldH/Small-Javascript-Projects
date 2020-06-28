@@ -1,37 +1,4 @@
-var vertexShader = [
-  "precision mediump float;",
-  "",
-  "attribute vec3 vertPosition;",
-  "attribute vec2 vertTexCoord;",
-  "",
-  "uniform mat4 worldMatrix;",
-  "uniform mat4 viewMatrix;",
-  "uniform mat4 projectionMatrix;",
-  "",
-  "varying vec2 fragTexCoord;",
-  "",
-  "void main()",
-  "{",
-  "fragTexCoord = vertTexCoord;",
-  "mat4 pvwMatrix = projectionMatrix * viewMatrix * worldMatrix;", // Operations occur right to left
-  "gl_Position = pvwMatrix * vec4(vertPosition, 1.0);",
-  "}",
-].join("\n");
-
-var fragmentShader = [
-  "precision mediump float;",
-  "",
-  "varying vec2 fragTexCoord;",
-  "uniform sampler2D sampler; // Uses Texture 0",
-  "",
-  "void main()",
-  "{",
-  "gl_FragColor = texture2D(sampler, fragTexCoord);",
-  "}",
-].join("\n");
-
 var init = function () {
-
   var canvas = document.getElementById("glCanvas");
   var glContext = canvas.getContext("webgl");
 
@@ -107,71 +74,190 @@ var init = function () {
   }
 
   /// Create and set buffer
-	var boxVertices = 
-	[ // X, Y, Z           U, V
-		// Top
-		-1.0, 1.0, -1.0,   0, 0,
-		-1.0, 1.0, 1.0,    0, 1,
-		1.0, 1.0, 1.0,     1, 1,
-		1.0, 1.0, -1.0,    1, 0,
+  var boxVertices = [
+    // X, Y, Z           U, V
+    // Top
+    -1.0,
+    1.0,
+    -1.0,
+    0,
+    0,
+    -1.0,
+    1.0,
+    1.0,
+    0,
+    1,
+    1.0,
+    1.0,
+    1.0,
+    1,
+    1,
+    1.0,
+    1.0,
+    -1.0,
+    1,
+    0,
 
-		// Left
-		-1.0, 1.0, 1.0,    0, 0,
-		-1.0, -1.0, 1.0,   1, 0,
-		-1.0, -1.0, -1.0,  1, 1,
-		-1.0, 1.0, -1.0,   0, 1,
+    // Left
+    -1.0,
+    1.0,
+    1.0,
+    0,
+    0,
+    -1.0,
+    -1.0,
+    1.0,
+    1,
+    0,
+    -1.0,
+    -1.0,
+    -1.0,
+    1,
+    1,
+    -1.0,
+    1.0,
+    -1.0,
+    0,
+    1,
 
-		// Right
-		1.0, 1.0, 1.0,    1, 1,
-		1.0, -1.0, 1.0,   0, 1,
-		1.0, -1.0, -1.0,  0, 0,
-		1.0, 1.0, -1.0,   1, 0,
+    // Right
+    1.0,
+    1.0,
+    1.0,
+    1,
+    1,
+    1.0,
+    -1.0,
+    1.0,
+    0,
+    1,
+    1.0,
+    -1.0,
+    -1.0,
+    0,
+    0,
+    1.0,
+    1.0,
+    -1.0,
+    1,
+    0,
 
-		// Front
-		1.0, 1.0, 1.0,    1, 1,
-		1.0, -1.0, 1.0,    1, 0,
-		-1.0, -1.0, 1.0,    0, 0,
-		-1.0, 1.0, 1.0,    0, 1,
+    // Front
+    1.0,
+    1.0,
+    1.0,
+    1,
+    1,
+    1.0,
+    -1.0,
+    1.0,
+    1,
+    0,
+    -1.0,
+    -1.0,
+    1.0,
+    0,
+    0,
+    -1.0,
+    1.0,
+    1.0,
+    0,
+    1,
 
-		// Back
-		1.0, 1.0, -1.0,    0, 0,
-		1.0, -1.0, -1.0,    0, 1,
-		-1.0, -1.0, -1.0,    1, 1,
-		-1.0, 1.0, -1.0,    1, 0,
+    // Back
+    1.0,
+    1.0,
+    -1.0,
+    0,
+    0,
+    1.0,
+    -1.0,
+    -1.0,
+    0,
+    1,
+    -1.0,
+    -1.0,
+    -1.0,
+    1,
+    1,
+    -1.0,
+    1.0,
+    -1.0,
+    1,
+    0,
 
-		// Bottom
-		-1.0, -1.0, -1.0,   1, 1,
-		-1.0, -1.0, 1.0,    1, 0,
-		1.0, -1.0, 1.0,     0, 0,
-		1.0, -1.0, -1.0,    0, 1,
-	];
-  
-  var boxIndices =
-	[
-		// Top
-		0, 1, 2,
-		0, 2, 3,
+    // Bottom
+    -1.0,
+    -1.0,
+    -1.0,
+    1,
+    1,
+    -1.0,
+    -1.0,
+    1.0,
+    1,
+    0,
+    1.0,
+    -1.0,
+    1.0,
+    0,
+    0,
+    1.0,
+    -1.0,
+    -1.0,
+    0,
+    1,
+  ];
 
-		// Left
-		5, 4, 6,
-		6, 4, 7,
+  var boxIndices = [
+    // Top
+    0,
+    1,
+    2,
+    0,
+    2,
+    3,
 
-		// Right
-		8, 9, 10,
-		8, 10, 11,
+    // Left
+    5,
+    4,
+    6,
+    6,
+    4,
+    7,
 
-		// Front
-		13, 12, 14,
-		15, 14, 12,
+    // Right
+    8,
+    9,
+    10,
+    8,
+    10,
+    11,
 
-		// Back
-		16, 17, 18,
-		16, 18, 19,
+    // Front
+    13,
+    12,
+    14,
+    15,
+    14,
+    12,
 
-		// Bottom
-		21, 20, 22,
-		22, 20, 23
-	];
+    // Back
+    16,
+    17,
+    18,
+    16,
+    18,
+    19,
+
+    // Bottom
+    21,
+    20,
+    22,
+    22,
+    20,
+    23,
+  ];
 
   // Create Vertex buffer object
   var boxVBO = glContext.createBuffer();
@@ -184,8 +270,12 @@ var init = function () {
 
   // Index Buffer Object, states the order and which verticies make up the triangles
   var boxIndexBufferObject = glContext.createBuffer();
-  glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, boxIndexBufferObject)
-  glContext.bufferData(glContext.ELEMENT_ARRAY_BUFFER, new Uint16Array(boxIndices), glContext.STATIC_DRAW);
+  glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, boxIndexBufferObject);
+  glContext.bufferData(
+    glContext.ELEMENT_ARRAY_BUFFER,
+    new Uint16Array(boxIndices),
+    glContext.STATIC_DRAW
+  );
 
   // Get a handle to the attribute locations
   var positionAttributeLocation = glContext.getAttribLocation(
@@ -225,15 +315,37 @@ var init = function () {
   var boxTexture = glContext.createTexture();
   glContext.bindTexture(glContext.TEXTURE_2D, boxTexture);
 
-  glContext.texParameteri(glContext.TEXTURE_2D, glContext.TEXTURE_WRAP_S, glContext.CLAMP_TO_EDGE);
-  glContext.texParameteri(glContext.TEXTURE_2D, glContext.TEXTURE_WRAP_T, glContext.CLAMP_TO_EDGE);
-  glContext.texParameteri(glContext.TEXTURE_2D, glContext.TEXTURE_MIN_FILTER, glContext.LINEAR);
-  glContext.texParameteri(glContext.TEXTURE_2D, glContext.TEXTURE_MAG_FILTER, glContext.LINEAR);
+  glContext.texParameteri(
+    glContext.TEXTURE_2D,
+    glContext.TEXTURE_WRAP_S,
+    glContext.CLAMP_TO_EDGE
+  );
+  glContext.texParameteri(
+    glContext.TEXTURE_2D,
+    glContext.TEXTURE_WRAP_T,
+    glContext.CLAMP_TO_EDGE
+  );
+  glContext.texParameteri(
+    glContext.TEXTURE_2D,
+    glContext.TEXTURE_MIN_FILTER,
+    glContext.LINEAR
+  );
+  glContext.texParameteri(
+    glContext.TEXTURE_2D,
+    glContext.TEXTURE_MAG_FILTER,
+    glContext.LINEAR
+  );
 
-  glContext.texImage2D(glContext.TEXTURE_2D, 0, glContext.RGBA, glContext.RGBA, glContext.UNSIGNED_BYTE, document.getElementById("crateTexture"));
+  glContext.texImage2D(
+    glContext.TEXTURE_2D,
+    0,
+    glContext.RGBA,
+    glContext.RGBA,
+    glContext.UNSIGNED_BYTE,
+    document.getElementById("crateTexture")
+  );
 
   glContext.bindTexture(glContext.TEXTURE_2D, null);
-
 
   // This sets the current program to our shader program in the OpenGL State Machine
   // This will bind the uniform calls to the current program
@@ -308,7 +420,12 @@ var init = function () {
     glContext.bindTexture(glContext.TEXTURE_2D, boxTexture);
 
     // Method of elements to skip, number of points to draw
-    glContext.drawElements(glContext.TRIANGLES, boxIndices.length, glContext.UNSIGNED_SHORT, 0);
+    glContext.drawElements(
+      glContext.TRIANGLES,
+      boxIndices.length,
+      glContext.UNSIGNED_SHORT,
+      0
+    );
 
     requestAnimationFrame(loop);
   };
