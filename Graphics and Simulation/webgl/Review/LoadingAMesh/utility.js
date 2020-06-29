@@ -1,8 +1,10 @@
 /// Loads Texture From File On Network
 
-var loadTexture = function (url, callback) {
+var loadTextResource = function (url, callback) {
   var request = new XMLHttpRequest();
-  request.open("GET", url, true);
+  // url + "?dont-cache=" + Math.random()
+  // prevents caching
+  request.open("GET", url + "?dont-cache=" + Math.random(), true);
   request.onload = function () {
     if (request.status < 200 || request.status > 299) {
       callback("ERROR::HTTP::" + request.status + " on resource " + url);
@@ -22,7 +24,7 @@ var loadImage = function (url, callback) {
 };
 
 var loadJSON = function (url, callback) {
-  loadTexture(url, function (err, result) {
+  loadTextResource(url, function (err, result) {
     if (err) {
       callback(err);
     } else {

@@ -1,366 +1,210 @@
-var init = function () {
+var gl;
+
+var initGLProg = function () {
+  loadTextResource("stdShader.vt", function (vsErr, vsText) {
+    if (vsErr) {
+      alert("ERROR::RESOURCE::Unable to get vertex shader");
+      console.error(vsErr);
+    } else {
+      loadTextResource("stdShader.fr", function (fsErr, fsText) {
+        if (fsErr) {
+          alert("ERROR::RESOURCE::Unable to get fragment shader");
+          console.error(fsErr);
+        } else {
+          loadJSON("floatingIsland.json", function (modelErr, modelObj) {
+            if (modelErr) {
+              //alert("ERROR::RESOURCE::Unable to get model");
+              console.error(modelErr);
+            } else {
+              loadImage("islandTexture.png", function (imageErr, imageObj) {
+                if (imageErr) {
+                  alert("ERROR::RESOURCE::Unable to get island texture");
+                  console.error(imageErr);
+                } else {
+                  runGLProg(vsText, fsText, modelObj, imageObj);
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+};
+
+var runGLProg = function (
+  vertexShaderRef,
+  fragmentShaderRef,
+  modelRef,
+  textureRef
+) {
   var canvas = document.getElementById("glCanvas");
-  var glContext = canvas.getContext("webgl");
+  var gl = canvas.getContext("webgl");
 
   // These next two conditionals are to ensure the browser sets up the context correctly
-  if (!glContext) {
+  if (!gl) {
     console.log("Using experimental webgl");
-    glContext = canvas.getContext("experimental-webgl");
+    gl = canvas.getContext("experimental-webgl");
   }
 
   // If there is an issue, it will print an alert as a last ditch effort
-  if (!glContext) {
+  if (!gl) {
     alert("WebGL Unsupported by browser.");
   }
 
   //   canvas.width = window.innerWidth;
   //   canvas.height = window.innerHeight;
-  //   glContext.viewport(0, 0, window.innerWidth, window.innerHeight);
+  //   gl.viewport(0, 0, window.innerWidth, window.innerHeight);
 
   // Enable Depth Test in OpenGL State Machine
   // This will enable depth testing in the rasterizer
   //    Compares pixel depth when deciding what to draw
-  glContext.enable(glContext.DEPTH_TEST);
+  gl.enable(gl.DEPTH_TEST);
 
   // Enable Back Face Culling in OpenGL State Machine
   // This will prevent unnecessary calculations of culled faces
-  glContext.enable(glContext.CULL_FACE);
-  glContext.frontFace(glContext.CCW);
-  glContext.cullFace(glContext.BACK);
+  gl.enable(gl.CULL_FACE);
+  gl.frontFace(gl.CCW);
+  gl.cullFace(gl.BACK);
 
-  glContext.clearColor(0.5, 0.85, 0.8, 1.0);
-  glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
+  gl.clearColor(0.5, 0.85, 0.8, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   // Create the shader objects
-  var vertShader = glContext.createShader(glContext.VERTEX_SHADER);
-  var fragShader = glContext.createShader(glContext.FRAGMENT_SHADER);
+  var vertShader = gl.createShader(gl.VERTEX_SHADER);
+  var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
 
   // Set shader source code
-  glContext.shaderSource(vertShader, vertexShader);
-  glContext.shaderSource(fragShader, fragmentShader);
+  gl.shaderSource(vertShader, vertexShaderRef);
+  gl.shaderSource(fragShader, fragmentShaderRef);
 
   // Compile shaders
-  glContext.compileShader(vertShader);
-  glContext.compileShader(fragShader);
+  gl.compileShader(vertShader);
+  gl.compileShader(fragShader);
 
-  if (!glContext.getShaderParameter(vertShader, glContext.COMPILE_STATUS)) {
+  if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
     console.error("ERROR::COMPILING::Unable to compile VERTEX shader");
     return;
   }
 
-  if (!glContext.getShaderParameter(fragShader, glContext.COMPILE_STATUS)) {
+  if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
     console.error("ERROR::COMPILING::Unable to compile FRAGMENT shader");
     return;
   }
 
   // Attach and link the shaders to the shader program
-  var program = glContext.createProgram();
-  glContext.attachShader(program, vertShader);
-  glContext.attachShader(program, fragShader);
+  var program = gl.createProgram();
+  gl.attachShader(program, vertShader);
+  gl.attachShader(program, fragShader);
 
-  glContext.linkProgram(program);
+  gl.linkProgram(program);
 
-  if (!glContext.getProgramParameter(program, glContext.LINK_STATUS)) {
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     console.error("ERROR::LINKING::Unable to link shaders into program");
     return;
   }
 
   // This will ensure that the given program is able to run in the current OpenGL/WebGL state
   // As stated in documentation, this step is expensive and typically only used during the app development stage
-  glContext.validateProgram(program);
+  gl.validateProgram(program);
 
-  if (!glContext.getProgramParameter(program, glContext.VALIDATE_STATUS)) {
+  if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
     console.error("ERROR::VALIDATION::Unable to validate shader program");
   }
 
   /// Create and set buffer
-  var boxVertices = [
-    // X, Y, Z           U, V
-    // Top
-    -1.0,
-    1.0,
-    -1.0,
-    0,
-    0,
-    -1.0,
-    1.0,
-    1.0,
-    0,
-    1,
-    1.0,
-    1.0,
-    1.0,
-    1,
-    1,
-    1.0,
-    1.0,
-    -1.0,
-    1,
-    0,
-
-    // Left
-    -1.0,
-    1.0,
-    1.0,
-    0,
-    0,
-    -1.0,
-    -1.0,
-    1.0,
-    1,
-    0,
-    -1.0,
-    -1.0,
-    -1.0,
-    1,
-    1,
-    -1.0,
-    1.0,
-    -1.0,
-    0,
-    1,
-
-    // Right
-    1.0,
-    1.0,
-    1.0,
-    1,
-    1,
-    1.0,
-    -1.0,
-    1.0,
-    0,
-    1,
-    1.0,
-    -1.0,
-    -1.0,
-    0,
-    0,
-    1.0,
-    1.0,
-    -1.0,
-    1,
-    0,
-
-    // Front
-    1.0,
-    1.0,
-    1.0,
-    1,
-    1,
-    1.0,
-    -1.0,
-    1.0,
-    1,
-    0,
-    -1.0,
-    -1.0,
-    1.0,
-    0,
-    0,
-    -1.0,
-    1.0,
-    1.0,
-    0,
-    1,
-
-    // Back
-    1.0,
-    1.0,
-    -1.0,
-    0,
-    0,
-    1.0,
-    -1.0,
-    -1.0,
-    0,
-    1,
-    -1.0,
-    -1.0,
-    -1.0,
-    1,
-    1,
-    -1.0,
-    1.0,
-    -1.0,
-    1,
-    0,
-
-    // Bottom
-    -1.0,
-    -1.0,
-    -1.0,
-    1,
-    1,
-    -1.0,
-    -1.0,
-    1.0,
-    1,
-    0,
-    1.0,
-    -1.0,
-    1.0,
-    0,
-    0,
-    1.0,
-    -1.0,
-    -1.0,
-    0,
-    1,
-  ];
-
-  var boxIndices = [
-    // Top
-    0,
-    1,
-    2,
-    0,
-    2,
-    3,
-
-    // Left
-    5,
-    4,
-    6,
-    6,
-    4,
-    7,
-
-    // Right
-    8,
-    9,
-    10,
-    8,
-    10,
-    11,
-
-    // Front
-    13,
-    12,
-    14,
-    15,
-    14,
-    12,
-
-    // Back
-    16,
-    17,
-    18,
-    16,
-    18,
-    19,
-
-    // Bottom
-    21,
-    20,
-    22,
-    22,
-    20,
-    23,
-  ];
+  var islandVertices = modelRef.meshes[0].vertices;
+  var islandIndices = [].concat.apply([], modelRef.meshes[0].faces);
+  var islandTexCoords = modelRef.meshes[0].texturecoords[0];
 
   // Create Vertex buffer object
-  var boxVBO = glContext.createBuffer();
-  glContext.bindBuffer(glContext.ARRAY_BUFFER, boxVBO);
-  glContext.bufferData(
-    glContext.ARRAY_BUFFER,
-    new Float32Array(boxVertices),
-    glContext.STATIC_DRAW
+  var islandVertexBufferObject = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, islandVertexBufferObject);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array(islandVertices),
+    gl.STATIC_DRAW
+  );
+
+  // Create Texture Coords buffer object
+  var islandTextureCoordsBufferObject = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, islandTextureCoordsBufferObject);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array(islandTexCoords),
+    gl.STATIC_DRAW
   );
 
   // Index Buffer Object, states the order and which verticies make up the triangles
-  var boxIndexBufferObject = glContext.createBuffer();
-  glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, boxIndexBufferObject);
-  glContext.bufferData(
-    glContext.ELEMENT_ARRAY_BUFFER,
-    new Uint16Array(boxIndices),
-    glContext.STATIC_DRAW
+  var islandIndexBufferObject = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, islandIndexBufferObject);
+  gl.bufferData(
+    gl.ELEMENT_ARRAY_BUFFER,
+    new Uint16Array(islandIndices),
+    gl.STATIC_DRAW
   );
 
+  gl.bindBuffer(gl.ARRAY_BUFFER, islandVertexBufferObject);
   // Get a handle to the attribute locations
-  var positionAttributeLocation = glContext.getAttribLocation(
-    program,
-    "vertPosition"
-  );
-  var texCoordAttributeLocation = glContext.getAttribLocation(
-    program,
-    "vertTexCoord"
-  );
-
+  var positionAttributeLocation = gl.getAttribLocation(program, "vertPosition");
   // Specify layout
-  glContext.vertexAttribPointer(
+  gl.vertexAttribPointer(
     positionAttributeLocation, // Attribute location handle
     3, // Elements being passed
-    glContext.FLOAT, // Type of element
-    glContext.FALSE, // Normalized data
-    5 * Float32Array.BYTES_PER_ELEMENT, // Total size of elements being passed AKA: Stride
+    gl.FLOAT, // Type of element
+    gl.FALSE, // Normalized data
+    3 * Float32Array.BYTES_PER_ELEMENT, // Total size of elements being passed AKA: Stride
     0 // Offset to this data, as a multiple of the byte length of given type
   );
+  gl.enableVertexAttribArray(positionAttributeLocation);
 
+  gl.bindBuffer(gl.ARRAY_BUFFER, islandTextureCoordsBufferObject);
+  var texCoordAttributeLocation = gl.getAttribLocation(program, "vertTexCoord");
   // Specify layout
-  glContext.vertexAttribPointer(
+  gl.vertexAttribPointer(
     texCoordAttributeLocation,
     2,
-    glContext.FLOAT,
-    glContext.FALSE,
-    5 * Float32Array.BYTES_PER_ELEMENT,
-    3 * Float32Array.BYTES_PER_ELEMENT // We have to offset by 2 for the <x, y> attributes that come before the RGB data
+    gl.FLOAT,
+    gl.FALSE,
+    2 * Float32Array.BYTES_PER_ELEMENT,
+    0 // We have to offset by 2 for the <x, y> attributes that come before the RGB data
   );
-
-  glContext.enableVertexAttribArray(positionAttributeLocation);
-  glContext.enableVertexAttribArray(texCoordAttributeLocation);
+  gl.enableVertexAttribArray(texCoordAttributeLocation);
 
   /// Create Texture
 
-  var boxTexture = glContext.createTexture();
-  glContext.bindTexture(glContext.TEXTURE_2D, boxTexture);
+  var islandTexture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, islandTexture);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-  glContext.texParameteri(
-    glContext.TEXTURE_2D,
-    glContext.TEXTURE_WRAP_S,
-    glContext.CLAMP_TO_EDGE
-  );
-  glContext.texParameteri(
-    glContext.TEXTURE_2D,
-    glContext.TEXTURE_WRAP_T,
-    glContext.CLAMP_TO_EDGE
-  );
-  glContext.texParameteri(
-    glContext.TEXTURE_2D,
-    glContext.TEXTURE_MIN_FILTER,
-    glContext.LINEAR
-  );
-  glContext.texParameteri(
-    glContext.TEXTURE_2D,
-    glContext.TEXTURE_MAG_FILTER,
-    glContext.LINEAR
-  );
-
-  glContext.texImage2D(
-    glContext.TEXTURE_2D,
+  gl.texImage2D(
+    gl.TEXTURE_2D,
     0,
-    glContext.RGBA,
-    glContext.RGBA,
-    glContext.UNSIGNED_BYTE,
-    document.getElementById("crateTexture")
+    gl.RGBA,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    textureRef
   );
 
-  glContext.bindTexture(glContext.TEXTURE_2D, null);
+  console.log(textureRef);
+
+  gl.bindTexture(gl.TEXTURE_2D, null);
 
   // This sets the current program to our shader program in the OpenGL State Machine
   // This will bind the uniform calls to the current program
-  glContext.useProgram(program);
+  gl.useProgram(program);
 
   // Setup Matrices
-  var worldMatrixUniformLocation = glContext.getUniformLocation(
+  var worldMatrixUniformLocation = gl.getUniformLocation(
     program,
     "worldMatrix"
   );
-  var viewMatrixUniformLocation = glContext.getUniformLocation(
-    program,
-    "viewMatrix"
-  );
-  var projectionMatrixUniformLocation = glContext.getUniformLocation(
+  var viewMatrixUniformLocation = gl.getUniformLocation(program, "viewMatrix");
+  var projectionMatrixUniformLocation = gl.getUniformLocation(
     program,
     "projectionMatrix"
   );
@@ -370,7 +214,7 @@ var init = function () {
   var projectionMatrix = new Float32Array(16);
 
   glMatrix.mat4.identity(worldMatrix);
-  glMatrix.mat4.lookAt(viewMatrix, [0, 0, -10], [0, 0, 0], [0, 1, 0]);
+  glMatrix.mat4.lookAt(viewMatrix, [0, 0, -12], [0, 0, 0], [0, 1, 0]);
   glMatrix.mat4.perspective(
     projectionMatrix,
     glMatrix.glMatrix.toRadian(45),
@@ -379,19 +223,11 @@ var init = function () {
     1000.0
   );
 
-  glContext.uniformMatrix4fv(
-    worldMatrixUniformLocation,
-    glContext.FALSE,
-    worldMatrix
-  );
-  glContext.uniformMatrix4fv(
-    viewMatrixUniformLocation,
-    glContext.FALSE,
-    viewMatrix
-  );
-  glContext.uniformMatrix4fv(
+  gl.uniformMatrix4fv(worldMatrixUniformLocation, gl.FALSE, worldMatrix);
+  gl.uniformMatrix4fv(viewMatrixUniformLocation, gl.FALSE, viewMatrix);
+  gl.uniformMatrix4fv(
     projectionMatrixUniformLocation,
-    glContext.FALSE,
+    gl.FALSE,
     projectionMatrix
   );
 
@@ -405,27 +241,18 @@ var init = function () {
   var loop = function () {
     angle = (performance.now() / 1000 / 6) * 2 * Math.PI;
     glMatrix.mat4.rotate(yRotMatrix, identityMatrix, angle, [0, 1, 0]);
-    glMatrix.mat4.rotate(xRotMatrix, identityMatrix, angle / 2, [1, 0, 0]);
-    glMatrix.mat4.mul(worldMatrix, xRotMatrix, yRotMatrix);
+    glMatrix.mat4.rotate(xRotMatrix, identityMatrix, -90, [1, 0, 0]);
+    glMatrix.mat4.mul(worldMatrix, yRotMatrix, xRotMatrix);
 
-    glContext.uniformMatrix4fv(
-      worldMatrixUniformLocation,
-      glContext.FALSE,
-      worldMatrix
-    );
+    gl.uniformMatrix4fv(worldMatrixUniformLocation, gl.FALSE, worldMatrix);
 
-    glContext.clearColor(0.5, 0.85, 0.8, 1.0);
-    glContext.clear(glContext.DEPTH_BUFFER_BIT | glContext.COLOR_BUFFER_BIT);
+    gl.clearColor(0.5, 0.85, 0.8, 1.0);
+    gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 
-    glContext.bindTexture(glContext.TEXTURE_2D, boxTexture);
+    gl.bindTexture(gl.TEXTURE_2D, islandTexture);
 
     // Method of elements to skip, number of points to draw
-    glContext.drawElements(
-      glContext.TRIANGLES,
-      boxIndices.length,
-      glContext.UNSIGNED_SHORT,
-      0
-    );
+    gl.drawElements(gl.TRIANGLES, islandIndices.length, gl.UNSIGNED_SHORT, 0);
 
     requestAnimationFrame(loop);
   };
