@@ -1,11 +1,11 @@
-var scene = THREE.Scene();
+var scene = new THREE.Scene();
 
 // Parameters: FOV, Ratio (w/h), near clipping plane, far clipping plane
-var camera = THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-documents.body.appendChild(renderer.domElement);
+document.body.appendChild(renderer.domElement);
 
 // Define shape
 var geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -30,3 +30,7 @@ var GameLoop = function () {
 }
 
 GameLoop();
+
+window.addEventListener('resize', function() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+ });
